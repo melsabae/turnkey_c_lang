@@ -1,17 +1,18 @@
 EXECUTABLE								:= $(shell basename $(shell pwd))
 LIB_LIB_PATH							:= lib
 LIB_INC_PATH							:= inc
-LIB_SRC_PATH							:= src
+SRC_PATH			    				:= src
+TEST_SRC_PATH             := test
 DOC_DIR                   := doc
 BUILD_ROOT								:= build
-SOURCE_FILES							:= $(notdir $(shell find $(LIB_SRC_PATH) -type f -iname '*.cpp'))
-VPATH                     := $(shell find $(LIB_SRC_PATH) -type d)
+SOURCE_FILES							:= $(notdir $(shell find $(SRC_PATH) -type f -iname '*.cpp'))
+VPATH                     := $(shell find $(SRC_PATH) -type d)
 
 COMPILER									:= g++
 COMPILER_OPTIONS					:= -Wall -Wextra -MD
 _INC_PATHS								:= $(shell find $(LIB_LIB_PATH) -type d -iname 'inc') $(LIB_INC_PATH)
 _LIB_PATHS								:=
-_LIB_NAMES								:= m
+_LIB_NAMES								:= m criterion
 INC_PATHS                 := $(_INC_PATHS:%=-I %)
 LIB_PATHS                 := $(_LIB_PATHS:%=-L %)
 LIB_LINKER_FLAGS          := $(_LIB_NAMES:%=-l %)
@@ -41,6 +42,8 @@ RELEASE_OBJECT_FILES			:= $(SOURCE_FILES:%.cpp=$(RELEASE_BUILD_ROOT)/%.o)
 RELEASE_DEP_FILES         := $(SOURCE_FILES:%.cpp=$(RELEASE_BUILD_ROOT)/%.d)
 RELEASE_EXECUTABLE        := $(RELEASE_BUILD_ROOT)/$(EXECUTABLE)_dbg
 RELEASE_COMPILER_LINE     := $(RELEASE_COMPILER_OPTIONS) $(RELEASE_INC_PATHS) $(RELEASE_LIB_PATHS) $(RELEASE_LIB_LINKER_FLAGS)
+
+TEST_FILES                := $(notdir $(shell find $(TEST_SRC_PATH) -type f -iname '*.cpp'))
 
 
 define compile
@@ -100,6 +103,10 @@ tags:
 
 docs:
 	@doxygen Doxyfile
+
+
+debug_tests: $(TEST_FILES) $(DEBUG_OBJECT_FILES)
+release_tests: $(TEST_FILES) $(RELEASE_OBJECT_FILES) $(TEST_FILES)
 
 
 $(DEBUG_DEP_FILES):

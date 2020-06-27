@@ -1,1 +1,1 @@
-cpp.makefile
+c.makefile
