@@ -1,2 +1,5 @@
 gmon.out
 *.swp
+sandbox*
+*.gcda
+*.gcno
