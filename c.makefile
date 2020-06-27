@@ -97,7 +97,7 @@ release: $(RELEASE_EXECUTABLE)
 
 
 tags:
-	@ctags -R -h .h .
+	@ctags -R -h .h $(SRC_PATH)
 
 
 docs:
