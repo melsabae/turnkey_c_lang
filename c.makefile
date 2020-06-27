@@ -91,12 +91,12 @@ $(RELEASE_EXECUTABLE): $(RELEASE_OBJECT_FILES) tags
 	@strip $(RELEASE_EXECUTABLE)
 
 
-# use the unfiltered list, as they are updated on header modifications
+# use the unfiltered list, as those objects are updated on header modifications
 $(DEBUG_TEST_EXECUTABLE): $(DEBUG_OBJECT_FILES)
 	$(call compile_binary, $(DEBUG_COMPILER_LINE), $@, $(DEBUG_TEST_OBJECT_FILES) $(TEST_SOURCE_FILES))
 
 
-# use the unfiltered list, as they are updated on header modifications
+# use the unfiltered list, as those objects are updated on header modifications
 $(RELEASE_TEST_EXECUTABLE): $(RELEASE_OBJECT_FILES)
 	$(call compile_binary, $(RELEASE_COMPILER_LINE), $@, $(RELEASE_TEST_OBJECT_FILES) $(TEST_SOURCE_FILES))
 
