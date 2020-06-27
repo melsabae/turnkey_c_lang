@@ -1,12 +1,13 @@
 EXECUTABLE								:= $(shell basename $(shell pwd))
 LIB_LIB_PATH							:= lib
 LIB_INC_PATH							:= inc
-SRC_PATH			    				:= src
-TEST_SRC_PATH             := test
-DOC_DIR                   := doc
+SOURCE_PATH			    			:= src
+TEST_SOURCE_PATH          := test
+DOC_PATH                  := doc
 BUILD_ROOT								:= build
-SOURCE_FILES							:= $(notdir $(shell find $(SRC_PATH) -type f -iname '*.cpp'))
-VPATH                     := $(shell find $(SRC_PATH) -type d)
+TEST_BUILD_ROOT           := $(TEST_SOURCE_PATH)/$(BUILD_ROOT)
+SOURCE_FILES							:= $(notdir $(shell find $(SOURCE_PATH) -type f -iname '*.cpp'))
+VPATH                     := $(shell find $(SOURCE_PATH) -type d)
 
 COMPILER									:= g++
 COMPILER_OPTIONS					:= -Wall -Wextra -MD
@@ -24,8 +25,10 @@ DEBUG_INC_PATHS						:= $(INC_PATHS) $(_DEBUG_INC_PATHS:%=-I %)
 DEBUG_LIB_PATHS						:= $(LIB_PATHS) $(DEBUG_LIB_PATHS:%=-L %)
 DEBUG_LIB_LINKER_FLAGS    := $(LIB_LINKER_FLAGS) $(_DEBUG_LIB_NAMES:%=-l %)
 DEBUG_BUILD_ROOT					:= $(BUILD_ROOT)/debug
+DEBUG_TEST_BUILD_ROOT     := $(TEST_BUILD_ROOT)/debug
 DEBUG_COMPILER_OPTIONS		:= $(COMPILER_OPTIONS) -g3 -Og -ggdb3 -pg -coverage -D DEBUG_BUILD
 DEBUG_OBJECT_FILES				:= $(SOURCE_FILES:%.cpp=$(DEBUG_BUILD_ROOT)/%.o)
+DEBUG_TEST_OBJECT_FILES   := $(filter-out $(DEBUG_BUILD_ROOT)/main.o, $(DEBUG_OBJECT_FILES))
 DEBUG_DEP_FILES           := $(SOURCE_FILES:%.cpp=$(DEBUG_BUILD_ROOT)/%.d)
 DEBUG_EXECUTABLE          := $(DEBUG_BUILD_ROOT)/$(EXECUTABLE)_dbg
 DEBUG_COMPILER_LINE       := $(DEBUG_COMPILER_OPTIONS) $(DEBUG_INC_PATHS) $(DEBUG_LIB_PATHS) $(DEBUG_LIB_LINKER_FLAGS)
@@ -37,13 +40,17 @@ RELEASE_INC_PATHS					:= $(INC_PATHS) $(_RELEASE_INC_PATHS:%=-I %)
 RELEASE_LIB_PATHS					:= $(LIB_PATHS) $(RELEASE_LIB_PATHS:%=-L %)
 RELEASE_LIB_LINKER_FLAGS  := $(LIB_LINKER_FLAGS) $(_RELEASE_LIB_NAMES:%=-l %)
 RELEASE_BUILD_ROOT				:= $(BUILD_ROOT)/release
+RELEASE_TEST_BUILD_ROOT   := $(TEST_BUILD_ROOT)/release
 RELEASE_COMPILER_OPTIONS	:= $(COMPILER_OPTIONS) -g0 -O3 -D RELEASE_BUILD
 RELEASE_OBJECT_FILES			:= $(SOURCE_FILES:%.cpp=$(RELEASE_BUILD_ROOT)/%.o)
+RELEASE_TEST_OBJECT_FILES := $(filter-out $(RELEASE_BUILD_ROOT)/main.o, $(RELEASE_OBJECT_FILES))
 RELEASE_DEP_FILES         := $(SOURCE_FILES:%.cpp=$(RELEASE_BUILD_ROOT)/%.d)
 RELEASE_EXECUTABLE        := $(RELEASE_BUILD_ROOT)/$(EXECUTABLE)_dbg
 RELEASE_COMPILER_LINE     := $(RELEASE_COMPILER_OPTIONS) $(RELEASE_INC_PATHS) $(RELEASE_LIB_PATHS) $(RELEASE_LIB_LINKER_FLAGS)
 
-TEST_FILES                := $(notdir $(shell find $(TEST_SRC_PATH) -type f -iname '*.cpp'))
+TEST_SOURCE_FILES         := $(shell find $(TEST_SOURCE_PATH) -type f -iname '*.cpp')
+DEBUG_TEST_EXECUTABLE     := $(DEBUG_TEST_BUILD_ROOT)/test
+RELEASE_TEST_EXECUTABLE   := $(RELEASE_TEST_BUILD_ROOT)/test
 
 
 define compile
@@ -66,7 +73,7 @@ endef
 
 
 $(DEBUG_BUILD_ROOT)/%.o: %.cpp $(DEBUG_BUILD_ROOT)/%.d
-$(DEBUG_BUILD_ROOT)/%.o: %.cpp makefile | dirs
+$(DEBUG_BUILD_ROOT)/%.o: %.cpp makefile
 	$(call compile_object, $(DEBUG_COMPILER_LINE), $@, $<)
 
 
@@ -75,7 +82,7 @@ $(DEBUG_EXECUTABLE): $(DEBUG_OBJECT_FILES) tags
 
 
 $(RELEASE_BUILD_ROOT)/%.o: %.cpp $(RELEASE_BUILD_ROOT)/%.d
-$(RELEASE_BUILD_ROOT)/%.o: %.cpp makefile | dirs
+$(RELEASE_BUILD_ROOT)/%.o: %.cpp makefile
 	$(call compile_object, $(RELEASE_COMPILER_LINE), $@, $<)
 
 
@@ -84,29 +91,43 @@ $(RELEASE_EXECUTABLE): $(RELEASE_OBJECT_FILES) tags
 	@strip $(RELEASE_EXECUTABLE)
 
 
-.PRECIOUS: dirs debug release
-dirs:
-	@mkdir -p $(DEBUG_BUILD_ROOT) $(RELEASE_BUILD_ROOT)
+# use the unfiltered list, as those objects are updated on header modifications
+$(DEBUG_TEST_EXECUTABLE): $(DEBUG_OBJECT_FILES) $(TEST_SOURCE_FILES)
+	$(call compile_binary, $(DEBUG_COMPILER_LINE), $@, $(DEBUG_TEST_OBJECT_FILES) $(TEST_SOURCE_FILES))
 
-clean:
-	rm -rf $(BUILD_ROOT)/*/*
+
+# use the unfiltered list, as those objects are updated on header modifications
+$(RELEASE_TEST_EXECUTABLE): $(RELEASE_OBJECT_FILES) $(TEST_SOURCE_FILES)
+	$(call compile_binary, $(RELEASE_COMPILER_LINE), $@, $(RELEASE_TEST_OBJECT_FILES) $(TEST_SOURCE_FILES))
+
+
+debug_tests: $(DEBUG_TEST_EXECUTABLE)
+	@./$(DEBUG_TEST_EXECUTABLE) --full-stats --verbose --always-succeed
+	@$(RM) sandbox* *.gcda *.gcno gmon.out
+
+
+release_tests: $(RELEASE_TEST_EXECUTABLE)
+	@./$(RELEASE_TEST_EXECUTABLE) --full-stats --verbose --always-succeed
+
+
 
 
 all: debug
 debug: $(DEBUG_EXECUTABLE)
 release: $(RELEASE_EXECUTABLE)
+tests: debug_tests
+
+
+clean:
+	rm -rf $(DEBUG_BUILD_ROOT)/* $(RELEASE_BUILD_ROOT)/* $(DEBUG_TEST_BUILD_ROOT)/* $(RELEASE_TEST_BUILD_ROOT)/*
 
 
 tags:
-	@ctags -R -h .h .
+	@ctags -R -h .h $(SOURCE_PATH)
 
 
 docs:
 	@doxygen Doxyfile
-
-
-debug_tests: $(TEST_FILES) $(DEBUG_OBJECT_FILES)
-release_tests: $(TEST_FILES) $(RELEASE_OBJECT_FILES) $(TEST_FILES)
 
 
 $(DEBUG_DEP_FILES):
