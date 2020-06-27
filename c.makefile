@@ -102,12 +102,12 @@ $(RELEASE_TEST_EXECUTABLE): $(RELEASE_OBJECT_FILES)
 
 
 debug_tests: $(DEBUG_TEST_BUILD_ROOT)/test
-	@./$(DEBUG_TEST_EXECUTABLE) --full-stats --verbose || touch /dev/null
+	@./$(DEBUG_TEST_EXECUTABLE) --full-stats --verbose --always-succeed
 	@$(RM) sandbox* *.gcda *.gcno gmon.out
 
 
 release_tests: $(RELEASE_TEST_BUILD_ROOT)/test
-	@./$(RELEASE_TEST_EXECUTABLE) --full-stats --verbose || touch /dev/null
+	@./$(RELEASE_TEST_EXECUTABLE) --full-stats --verbose --always-succeed
 
 
 
