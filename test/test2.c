@@ -2,5 +2,6 @@
 
 Test(make_unit_tests_test, always_pass)
 {
-  cr_assert(1, "ahoy, matey!");
+  cr_assert(1, "this will always pass.");
+
 }

@@ -92,21 +92,21 @@ $(RELEASE_EXECUTABLE): $(RELEASE_OBJECT_FILES) tags
 
 
 # use the unfiltered list, as those objects are updated on header modifications
-$(DEBUG_TEST_EXECUTABLE): $(DEBUG_OBJECT_FILES)
+$(DEBUG_TEST_EXECUTABLE): $(DEBUG_OBJECT_FILES) $(TEST_SOURCE_FILES)
 	$(call compile_binary, $(DEBUG_COMPILER_LINE), $@, $(DEBUG_TEST_OBJECT_FILES) $(TEST_SOURCE_FILES))
 
 
 # use the unfiltered list, as those objects are updated on header modifications
-$(RELEASE_TEST_EXECUTABLE): $(RELEASE_OBJECT_FILES)
+$(RELEASE_TEST_EXECUTABLE): $(RELEASE_OBJECT_FILES) $(TEST_SOURCE_FILES)
 	$(call compile_binary, $(RELEASE_COMPILER_LINE), $@, $(RELEASE_TEST_OBJECT_FILES) $(TEST_SOURCE_FILES))
 
 
-debug_tests: $(DEBUG_TEST_BUILD_ROOT)/test
+debug_tests: $(DEBUG_TEST_EXECUTABLE)
 	@./$(DEBUG_TEST_EXECUTABLE) --full-stats --verbose --always-succeed
 	@$(RM) sandbox* *.gcda *.gcno gmon.out
 
 
-release_tests: $(RELEASE_TEST_BUILD_ROOT)/test
+release_tests: $(RELEASE_TEST_EXECUTABLE)
 	@./$(RELEASE_TEST_EXECUTABLE) --full-stats --verbose --always-succeed
 
 
