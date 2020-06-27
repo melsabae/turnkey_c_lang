@@ -6,9 +6,8 @@ TEST_SOURCE_PATH          := test
 DOC_PATH                  := doc
 BUILD_ROOT								:= build
 TEST_BUILD_ROOT           := $(TEST_SOURCE_PATH)/$(BUILD_ROOT)
-SOURCE_FILES							:= $(notdir $(shell find $(SOURCE_PATH) -type f -iname '*.c'))
-VPATH                     := $(shell find $(SOURCE_PATH) -type d)
 
+FILE_EXTENSION            := c
 COMPILER									:= gcc
 COMPILER_OPTIONS					:= -Wall -Wextra -MD
 _INC_PATHS								:= $(shell find $(LIB_LIB_PATH) -type d -iname 'inc') $(LIB_INC_PATH)
@@ -17,6 +16,8 @@ _LIB_NAMES								:= m criterion
 INC_PATHS                 := $(_INC_PATHS:%=-I %)
 LIB_PATHS                 := $(_LIB_PATHS:%=-L %)
 LIB_LINKER_FLAGS          := $(_LIB_NAMES:%=-l %)
+SOURCE_FILES							:= $(notdir $(shell find $(SOURCE_PATH) -type f -iname '*.$(FILE_EXTENSION)'))
+VPATH                     := $(shell find $(SOURCE_PATH) -type d)
 
 _DEBUG_INC_PATHS          :=
 _DEBUG_LIB_PATHS          :=
@@ -27,9 +28,9 @@ DEBUG_LIB_LINKER_FLAGS    := $(LIB_LINKER_FLAGS) $(_DEBUG_LIB_NAMES:%=-l %)
 DEBUG_BUILD_ROOT					:= $(BUILD_ROOT)/debug
 DEBUG_TEST_BUILD_ROOT     := $(TEST_BUILD_ROOT)/debug
 DEBUG_COMPILER_OPTIONS		:= $(COMPILER_OPTIONS) -g3 -Og -ggdb3 -pg -coverage -D DEBUG_BUILD
-DEBUG_OBJECT_FILES				:= $(SOURCE_FILES:%.c=$(DEBUG_BUILD_ROOT)/%.o)
+DEBUG_OBJECT_FILES				:= $(SOURCE_FILES:%.$(FILE_EXTENSION)=$(DEBUG_BUILD_ROOT)/%.o)
 DEBUG_TEST_OBJECT_FILES   := $(filter-out $(DEBUG_BUILD_ROOT)/main.o, $(DEBUG_OBJECT_FILES))
-DEBUG_DEP_FILES           := $(SOURCE_FILES:%.c=$(DEBUG_BUILD_ROOT)/%.d)
+DEBUG_DEP_FILES           := $(SOURCE_FILES:%.$(FILE_EXTENSION)=$(DEBUG_BUILD_ROOT)/%.d)
 DEBUG_EXECUTABLE          := $(DEBUG_BUILD_ROOT)/$(EXECUTABLE)_dbg
 DEBUG_COMPILER_LINE       := $(DEBUG_COMPILER_OPTIONS) $(DEBUG_INC_PATHS) $(DEBUG_LIB_PATHS) $(DEBUG_LIB_LINKER_FLAGS)
 
@@ -42,19 +43,19 @@ RELEASE_LIB_LINKER_FLAGS  := $(LIB_LINKER_FLAGS) $(_RELEASE_LIB_NAMES:%=-l %)
 RELEASE_BUILD_ROOT				:= $(BUILD_ROOT)/release
 RELEASE_TEST_BUILD_ROOT   := $(TEST_BUILD_ROOT)/release
 RELEASE_COMPILER_OPTIONS	:= $(COMPILER_OPTIONS) -g0 -O3 -D RELEASE_BUILD
-RELEASE_OBJECT_FILES			:= $(SOURCE_FILES:%.c=$(RELEASE_BUILD_ROOT)/%.o)
+RELEASE_OBJECT_FILES			:= $(SOURCE_FILES:%.$(FILE_EXTENSION)=$(RELEASE_BUILD_ROOT)/%.o)
 RELEASE_TEST_OBJECT_FILES := $(filter-out $(RELEASE_BUILD_ROOT)/main.o, $(RELEASE_OBJECT_FILES))
-RELEASE_DEP_FILES         := $(SOURCE_FILES:%.c=$(RELEASE_BUILD_ROOT)/%.d)
+RELEASE_DEP_FILES         := $(SOURCE_FILES:%.$(FILE_EXTENSION)=$(RELEASE_BUILD_ROOT)/%.d)
 RELEASE_EXECUTABLE        := $(RELEASE_BUILD_ROOT)/$(EXECUTABLE)_dbg
 RELEASE_COMPILER_LINE     := $(RELEASE_COMPILER_OPTIONS) $(RELEASE_INC_PATHS) $(RELEASE_LIB_PATHS) $(RELEASE_LIB_LINKER_FLAGS)
 
-TEST_SOURCE_FILES         := $(shell find $(TEST_SOURCE_PATH) -type f -iname '*.c')
+TEST_SOURCE_FILES         := $(shell find $(TEST_SOURCE_PATH) -type f -iname '*.$(FILE_EXTENSION)')
 DEBUG_TEST_EXECUTABLE     := $(DEBUG_TEST_BUILD_ROOT)/test
 RELEASE_TEST_EXECUTABLE   := $(RELEASE_TEST_BUILD_ROOT)/test
 
 
 define compile
-	@$(COMPILER) $1 -o $2 $3
+	$(COMPILER) $1 -o $2 $3
 endef
 
 
@@ -72,8 +73,8 @@ define compile_binary
 endef
 
 
-$(DEBUG_BUILD_ROOT)/%.o: %.c $(DEBUG_BUILD_ROOT)/%.d
-$(DEBUG_BUILD_ROOT)/%.o: %.c makefile
+$(DEBUG_BUILD_ROOT)/%.o: %.$(FILE_EXTENSION) $(DEBUG_BUILD_ROOT)/%.d
+$(DEBUG_BUILD_ROOT)/%.o: %.$(FILE_EXTENSION) makefile
 	$(call compile_object, $(DEBUG_COMPILER_LINE), $@, $<)
 
 
@@ -81,8 +82,8 @@ $(DEBUG_EXECUTABLE): $(DEBUG_OBJECT_FILES) tags
 	$(call compile_binary, $(DEBUG_COMPILER_LINE), $@, $(DEBUG_OBJECT_FILES))
 
 
-$(RELEASE_BUILD_ROOT)/%.o: %.c $(RELEASE_BUILD_ROOT)/%.d
-$(RELEASE_BUILD_ROOT)/%.o: %.c makefile
+$(RELEASE_BUILD_ROOT)/%.o: %.$(FILE_EXTENSION) $(RELEASE_BUILD_ROOT)/%.d
+$(RELEASE_BUILD_ROOT)/%.o: %.$(FILE_EXTENSION) makefile
 	$(call compile_object, $(RELEASE_COMPILER_LINE), $@, $<)
 
 
@@ -113,9 +114,9 @@ release_tests: $(RELEASE_TEST_EXECUTABLE)
 
 
 all: debug
+tests: debug_tests
 debug: $(DEBUG_EXECUTABLE)
 release: $(RELEASE_EXECUTABLE)
-tests: debug_tests
 
 
 clean:
