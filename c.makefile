@@ -1,63 +1,63 @@
-EXECUTABLE								:= $(shell basename $(shell pwd))
-LIB_LIB_PATH							:= lib
-LIB_INC_PATH							:= inc
-SOURCE_PATH			    			:= src
-TEST_SOURCE_PATH          := test
-DOC_PATH                  := doc
-BUILD_ROOT								:= build
-TEST_BUILD_ROOT           := $(TEST_SOURCE_PATH)/$(BUILD_ROOT)
-SOURCE_FILES							:= $(notdir $(shell find $(SOURCE_PATH) -type f -iname '*.c'))
-TEST_SOURCE_FILES         := $(notdir $(shell find $(TEST_SOURCE_PATH) -type f -iname '*.c'))
-VPATH                     := $(shell find $(SOURCE_PATH) -type d)
+EXECUTABLE								   := $(shell basename $(shell pwd))
+LIB_LIB_PATH							   := lib
+LIB_INC_PATH							   := inc
+SOURCE_PATH			    			   := src
+TEST_SOURCE_PATH             := test
+DOC_PATH                     := doc
+BUILD_ROOT								   := build
+TEST_BUILD_ROOT              := $(TEST_SOURCE_PATH)/$(BUILD_ROOT)
+SOURCE_FILES							   := $(notdir $(shell find $(SOURCE_PATH) -type f -iname '*.c'))
+VPATH                        := $(shell find $(SOURCE_PATH) -type d)
 
-COMPILER									:= gcc
-COMPILER_OPTIONS					:= -Wall -Wextra -MD
-_INC_PATHS								:= $(shell find $(LIB_LIB_PATH) -type d -iname 'inc') $(LIB_INC_PATH)
-_LIB_PATHS								:=
-_LIB_NAMES								:= m criterion
-INC_PATHS                 := $(_INC_PATHS:%=-I %)
-LIB_PATHS                 := $(_LIB_PATHS:%=-L %)
-LIB_LINKER_FLAGS          := $(_LIB_NAMES:%=-l %)
+COMPILER									   := gcc
+COMPILER_OPTIONS					   := -Wall -Wextra -MD
+_INC_PATHS								   := $(shell find $(LIB_LIB_PATH) -type d -iname 'inc') $(LIB_INC_PATH)
+_LIB_PATHS								   :=
+_LIB_NAMES								   := m criterion
+INC_PATHS                    := $(_INC_PATHS:%=-I %)
+LIB_PATHS                    := $(_LIB_PATHS:%=-L %)
+LIB_LINKER_FLAGS             := $(_LIB_NAMES:%=-l %)
 
-_DEBUG_INC_PATHS          :=
-_DEBUG_LIB_PATHS          :=
-_DEBUG_LIB_NAMES          :=
-DEBUG_INC_PATHS						:= $(INC_PATHS) $(_DEBUG_INC_PATHS:%=-I %)
-DEBUG_LIB_PATHS						:= $(LIB_PATHS) $(DEBUG_LIB_PATHS:%=-L %)
-DEBUG_LIB_LINKER_FLAGS    := $(LIB_LINKER_FLAGS) $(_DEBUG_LIB_NAMES:%=-l %)
-DEBUG_BUILD_ROOT					:= $(BUILD_ROOT)/debug
-DEBUG_TEST_BUILD_ROOT     := $(TEST_BUILD_ROOT)/debug
-DEBUG_COMPILER_OPTIONS		:= $(COMPILER_OPTIONS) -g3 -Og -ggdb3 -pg -coverage -D DEBUG_BUILD
-DEBUG_OBJECT_FILES				:= $(SOURCE_FILES:%.c=$(DEBUG_BUILD_ROOT)/%.o)
-DEBUG_TEST_OBJECT_FILES   := $(filter-out $(DEBUG_BUILD_ROOT)/main.o, $(DEBUG_OBJECT_FILES))
-DEBUG_DEP_FILES           := $(SOURCE_FILES:%.c=$(DEBUG_BUILD_ROOT)/%.d)
-DEBUG_EXECUTABLE          := $(DEBUG_BUILD_ROOT)/$(EXECUTABLE)_dbg
-DEBUG_COMPILER_LINE       := $(DEBUG_COMPILER_OPTIONS) $(DEBUG_INC_PATHS) $(DEBUG_LIB_PATHS) $(DEBUG_LIB_LINKER_FLAGS)
+_DEBUG_INC_PATHS             :=
+_DEBUG_LIB_PATHS             :=
+_DEBUG_LIB_NAMES             :=
+DEBUG_INC_PATHS						   := $(INC_PATHS) $(_DEBUG_INC_PATHS:%=-I %)
+DEBUG_LIB_PATHS						   := $(LIB_PATHS) $(DEBUG_LIB_PATHS:%=-L %)
+DEBUG_LIB_LINKER_FLAGS       := $(LIB_LINKER_FLAGS) $(_DEBUG_LIB_NAMES:%=-l %)
+DEBUG_BUILD_ROOT					   := $(BUILD_ROOT)/debug
+DEBUG_TEST_BUILD_ROOT        := $(TEST_BUILD_ROOT)/debug
+DEBUG_COMPILER_OPTIONS		   := $(COMPILER_OPTIONS) -g3 -Og -ggdb3 -pg -coverage -D DEBUG_BUILD
+DEBUG_OBJECT_FILES				   := $(SOURCE_FILES:%.c=$(DEBUG_BUILD_ROOT)/%.o)
+DEBUG_TEST_OBJECT_FILES      := $(filter-out $(DEBUG_BUILD_ROOT)/main.o, $(DEBUG_OBJECT_FILES))
+DEBUG_DEP_FILES              := $(SOURCE_FILES:%.c=$(DEBUG_BUILD_ROOT)/%.d)
+DEBUG_EXECUTABLE             := $(DEBUG_BUILD_ROOT)/$(EXECUTABLE)_dbg
+DEBUG_COMPILER_LINE          := $(DEBUG_COMPILER_OPTIONS) $(DEBUG_INC_PATHS) $(DEBUG_LIB_PATHS) $(DEBUG_LIB_LINKER_FLAGS)
 
-_RELEASE_INC_PATHS        :=
-_RELEASE_LIB_PATHS        :=
-_RELEASE_LIB_NAMES        :=
-RELEASE_INC_PATHS					:= $(INC_PATHS) $(_RELEASE_INC_PATHS:%=-I %)
-RELEASE_LIB_PATHS					:= $(LIB_PATHS) $(RELEASE_LIB_PATHS:%=-L %)
-RELEASE_LIB_LINKER_FLAGS  := $(LIB_LINKER_FLAGS) $(_RELEASE_LIB_NAMES:%=-l %)
-RELEASE_BUILD_ROOT				:= $(BUILD_ROOT)/release
-RELEASE_TEST_BUILD_ROOT   := $(TEST_BUILD_ROOT)/release
-RELEASE_COMPILER_OPTIONS	:= $(COMPILER_OPTIONS) -g0 -O3 -D RELEASE_BUILD
-RELEASE_OBJECT_FILES			:= $(SOURCE_FILES:%.c=$(RELEASE_BUILD_ROOT)/%.o)
-RELEASE_TEST_OBJECT_FILES := $(filter-out $(RELEASE_BUILD_ROOT)/main.o, $(RELEASE_OBJECT_FILES))
-RELEASE_DEP_FILES         := $(SOURCE_FILES:%.c=$(RELEASE_BUILD_ROOT)/%.d)
-RELEASE_EXECUTABLE        := $(RELEASE_BUILD_ROOT)/$(EXECUTABLE)_dbg
-RELEASE_COMPILER_LINE     := $(RELEASE_COMPILER_OPTIONS) $(RELEASE_INC_PATHS) $(RELEASE_LIB_PATHS) $(RELEASE_LIB_LINKER_FLAGS)
+_RELEASE_INC_PATHS           :=
+_RELEASE_LIB_PATHS           :=
+_RELEASE_LIB_NAMES           :=
+RELEASE_INC_PATHS					   := $(INC_PATHS) $(_RELEASE_INC_PATHS:%=-I %)
+RELEASE_LIB_PATHS					   := $(LIB_PATHS) $(RELEASE_LIB_PATHS:%=-L %)
+RELEASE_LIB_LINKER_FLAGS     := $(LIB_LINKER_FLAGS) $(_RELEASE_LIB_NAMES:%=-l %)
+RELEASE_BUILD_ROOT				   := $(BUILD_ROOT)/release
+RELEASE_TEST_BUILD_ROOT      := $(TEST_BUILD_ROOT)/release
+RELEASE_COMPILER_OPTIONS	   := $(COMPILER_OPTIONS) -g0 -O3 -D RELEASE_BUILD
+RELEASE_OBJECT_FILES			   := $(SOURCE_FILES:%.c=$(RELEASE_BUILD_ROOT)/%.o)
+RELEASE_TEST_OBJECT_FILES    := $(filter-out $(RELEASE_BUILD_ROOT)/main.o, $(RELEASE_OBJECT_FILES))
+RELEASE_DEP_FILES            := $(SOURCE_FILES:%.c=$(RELEASE_BUILD_ROOT)/%.d)
+RELEASE_EXECUTABLE           := $(RELEASE_BUILD_ROOT)/$(EXECUTABLE)_dbg
+RELEASE_COMPILER_LINE        := $(RELEASE_COMPILER_OPTIONS) $(RELEASE_INC_PATHS) $(RELEASE_LIB_PATHS) $(RELEASE_LIB_LINKER_FLAGS)
 
-TEST_FILES                := $(notdir $(shell find $(TEST_SOURCE_PATH) -type f -iname '*.c'))
-DEBUG_TEST_FILES          := $(TEST_FILES:%.c=$(DEBUG_TEST_BUILD_ROOT)/%.test)
-RELEASE_TEST_FILES        := $(TEST_FILES:%.c=$(RELEASE_TEST_BUILD_ROOT)/%.test)
+TEST_SOURCE_FILES            := $(shell find $(TEST_SOURCE_PATH) -type f -iname '*.c')
+DEBUG_TEST_EXECUTABLE        := $(DEBUG_TEST_BUILD_ROOT)/test
+DEBUG_TEST_COMPILE_OPTIONS   := $(COMPILER_OPTIONS) -D DEBUG_BUILD
+RELEASE_TEST_EXECUTABLE      := $(RELEASE_TEST_BUILD_ROOT)/test
+RELEASE_TEST_COMPILE_OPTIONS := $(RELEASE_COMPILER_OPTIONS)
 
 
 define compile
 	@$(COMPILER) $1 -o $2 $3
 endef
-
 
 define compile_object
 	@$(info $(shell date +%s.%N) compiling $3  ->  $2)
@@ -92,40 +92,21 @@ $(RELEASE_EXECUTABLE): $(RELEASE_OBJECT_FILES) tags
 	@strip $(RELEASE_EXECUTABLE)
 
 
-clean:
-	rm -rf $(DEBUG_BUILD_ROOT)/* $(RELEASE_BUILD_ROOT)/* $(DEBUG_TEST_BUILD_ROOT)/* $(RELEASE_TEST_BUILD_ROOT)/*
+$(RELEASE_TEST_EXECUTABLE): $(RELEASE_TEST_OBJECT_FILES)
+	$(call compile_binary, $(RELEASE_COMPILER_LINE), $@, $(RELEASE_TEST_OBJECT_FILES) $(TEST_SOURCE_FILES))
 
 
-$(DEBUG_TEST_BUILD_ROOT)/%.o: $(TEST_SOURCE_PATH)/%.c
-	$(call compile_object, $(DEBUG_COMPILER_LINE), $@, $<)
-
-
-$(RELEASE_TEST_BUILD_ROOT)/%.o:  $(TEST_SOURCE_PATH)/%.c
-	$(call compile_object, $(RELEASE_COMPILER_LINE), $@, $<)
-
-
-$(DEBUG_TEST_BUILD_ROOT)/%.test: $(DEBUG_TEST_BUILD_ROOT)/%.o $(DEBUG_TEST_OBJECT_FILES)
-	$(call compile_binary, $(DEBUG_COMPILER_LINE), $@, $(DEBUG_TEST_OBJECT_FILES) $<)
-
-
-$(RELEASE_TEST_BUILD_ROOT)/%.test: $(RELEASE_TEST_BUILD_ROOT)/%.o $(RELEASE_TEST_OBJECT_FILES)
-	$(call compile_binary, $(RELEASE_COMPILER_LINE), $@, $(RELEASE_TEST_OBJECT_FILES) $<)
-
-
-debug_tests: $(DEBUG_TEST_FILES)
-	@echo MUST RUN DEBUG TESTS
-
-
-release_tests: $(RELEASE_TEST_FILES)
-	@echo MUST RUN RELEASE TESTS
-
-
-tests: debug_tests
 
 
 all: debug
 debug: $(DEBUG_EXECUTABLE)
 release: $(RELEASE_EXECUTABLE)
+tests: $(RELEASE_TEST_EXECUTABLE)
+	@./$(RELEASE_TEST_EXECUTABLE) --verbose --full-stats || touch /dev/null
+
+
+clean:
+	rm -rf $(DEBUG_BUILD_ROOT)/* $(RELEASE_BUILD_ROOT)/* $(DEBUG_TEST_BUILD_ROOT)/* $(RELEASE_TEST_BUILD_ROOT)/*
 
 
 tags:
