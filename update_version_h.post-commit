@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# toss the just-committed hash into the version.h file
+echo '#DEFINE' COMMIT_HASH \(\"$(git log -1 --pretty=oneline | cut -f1 -d' ')\"\) > src/version.h
+
+## stage version.h for commit
+git add version.h
+#
+## commit the version.h change as well
+git commit --no-verify -m 'update version.h with commit hash'
+
