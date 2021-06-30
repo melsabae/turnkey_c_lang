@@ -1,3 +1,6 @@
+add_subdirectory(test)
+
+
 execute_process(
     COMMAND "date"
     OUTPUT_VARIABLE compile_time
