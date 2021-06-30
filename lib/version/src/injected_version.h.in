@@ -1,0 +1,11 @@
+#ifndef   INJECTED_VERSION_H
+#define   INJECTED_VERSION_H
+
+
+#define GIT_BUILD_HASH   ("@git_build_hash@")
+#define GIT_BUILD_BRANCH ("@git_build_branch@")
+#define COMPILE_TIME     ("@compile_time@")
+
+
+#endif // INJECTED_VERSION_H
+
